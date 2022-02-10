@@ -1,67 +1,104 @@
-module.exports = function win (data){
 
-    const reelsWindowStop = getArrWindowForOneReels(data)
 
-    const paylines = getNewArrPaylines (reelsWindowStop, data)
-    
-    console.log(reelsWindowStop, paylines);
-
-    const combinations = findWinKomb(paylines, data)
-    console.log(combinations);
-
-    return { paylines, reelsWindowStop}
-}
-
-function findWinKomb(arr1, obj){
-    const result = []
-    // const arr = [
-    //     [ 'PIC2', 'j', 'PIC2', 'Q', '10' ],
-    //     [ 'PIC4', 'PIC4', 'J', 'PIC1', 'J' ]
-    //   ]
-
-    
-    return result
-}
-
-function getNewArrPaylines (arr, obj) {
-    // console.log(arr)
-    const window = obj.window.geometry[0]
-    const paylines = obj.paylines
-
-    const result = []
-
-    // console.log(paylines[0][0]);
-
-    for(let i = 0; i < window; i++){
-        if(paylines[i][0] > 0) {
-            const arr2 = arr.map(e => e.slice(i, i + 1).join(''))
-            result.push(arr2)
-        }
+class Win {
+    constructor({bet}, {reels, window: {geometry}, gamePaytable: {data}, paylines}){
+        this.bet = bet
+        this.reels = reels
+        this.geometry = geometry
+        this.data = data
+        this.paylines = paylines
     }
 
-    return result
-}
+    getTotalWin () {
+        const reelsWindowStop = this.getArrWindowForOneReels(this.reels, this.geometry)
+        const paylinesArr = this.getPaylinesArr(reelsWindowStop) 
+        const combinations = this.getCombinations(paylinesArr)
+        const totalWin = this.getTotalWinNumber(combinations)
+        return {totalWin}
+    }
 
-function getArrWindowForOneReels(obj) {
-    const a = obj.reels.reduce((acc, str) => {
-        const window = obj.window.geometry[0]
-        const newArr = str.split(',')
-        const maxNum = newArr.length - 1
-        const randomNum = getRandomInt(maxNum)
+    getTotalWinNumber(arr){
+        let result = 0
 
-        if(maxNum - randomNum >= 0 && maxNum - randomNum < window) {
-            const num2 = window - (maxNum - randomNum) - 1
-            // console.log(a, b, num2);
-            acc.push([...newArr.splice(randomNum), ...newArr.slice(0, num2)])
-            return acc
-        }else {
-            acc.push(newArr.splice(randomNum, window))
-            return acc 
+        arr.forEach(e => {
+            for(let key in e){
+                result = Number(this.bet) * this.data[key][e[key] - 1] * 150 * 100
+                return result
+            }
+        })
+
+        return result
+    }
+
+    getCombinations(arr) {
+        let res = []
+
+        arr.forEach(e => {
+            const number = e.map((name) => {
+                return {count: 1, name: name}
+              })
+              .reduce((acc, b) => {
+                acc[b.name] = (acc[b.name] || 0) + b.count
+                return acc
+              }, {})
+              res.push(number)
+        })
+        return res
+    }
+
+    getNewArrWindow (arr) {
+        const window = this.geometry[0]
+        const result = []
+    
+        for(let i = 0; i < window; i++){
+            const arr2 = arr.map(e => e.slice(i, i + 1).reverse().join(''))
+            result.push(arr2)
         }
-    }, [])
-    return a
+    
+        return result.reverse()
+    }
+
+    getPaylinesArr(arrWindow) {
+        const newArrWindow = this.getNewArrWindow(arrWindow)
+        const arr = this.paylines
+        const result = []
+        for(let i = 0; i <= arr.length - 1; i++){
+            const arrEl = []
+            for( let j = 0; j <= arr[i].length - 1; j++){
+                
+                if(arr[i][j] > 0){
+                    arrEl.push(newArrWindow[i][j])
+                }
+            }
+            result.push(arrEl)
+        }
+        return result
+    }
+
+    getArrWindowForOneReels() {
+        const size = this.geometry[0]
+        const arr2 = [...this.reels]
+        const result = arr2.reduce((acc, str) => {
+            const newArr = str.split(',')
+            const maxNum = newArr.length - 1
+            const randomNum = this.getRandomInt(maxNum)
+    
+            if(maxNum - randomNum >= 0 && maxNum - randomNum < size) {
+                const num2 = size - (maxNum - randomNum) - 1
+                acc.push([...newArr.splice(randomNum), ...newArr.slice(0, num2)])
+                return acc
+            }else {
+                acc.push(newArr.splice(randomNum, size))
+                return acc
+            }
+        }, [])
+        return result
+    }
+    
+    getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
 }
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
+module.exports = Win

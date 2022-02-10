@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router()
-const win = require('../../helpers/determinesPayoff')
+const configuration = require('../../configuration.json')
+const Win = require('../../helpers/determinesPayoff')
 
 router.use((req, res, next) => {
     console.log('Time: ', Date.now())
@@ -10,12 +11,12 @@ router.use((req, res, next) => {
 
 
 
-router.post(
+router.get(
     '/',
     async (req, res, next) => {
         try {
-            const result = win(req.body)
-            res.send(result)
+            const result = new Win(req.query, configuration)
+            res.send(result.getTotalWin())
         } catch (err) {
             next(err)
         }
