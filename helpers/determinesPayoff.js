@@ -17,7 +17,7 @@ class Win {
         return {totalWin}
     }
 
-    getTotalWinNumber(arr){
+    getTotalWinNumber(arr){                     // підраховує загальний виграш
         let result = 0
 
         arr.forEach(e => {
@@ -30,7 +30,7 @@ class Win {
         return result
     }
 
-    getCombinations(arr) {
+    getCombinations(arr) {                      // повертає масив однакових значень у лінії 
         let res = []
 
         arr.forEach(e => {
@@ -46,7 +46,25 @@ class Win {
         return res
     }
 
-    getNewArrWindow (arr) {
+
+
+    getPaylinesArr(arrWindow) {                 // отримуємо масив по лініях які грають 
+        const newArrWindow = this.getNewArrWindow(arrWindow)
+        const arr = this.paylines
+        const result = []
+        for(let i = 0; i <= arr.length - 1; i++){
+            const arrEl = []
+            for( let j = 0; j <= arr[i].length - 1; j++){
+                if(arr[i][j] > 0){
+                    arrEl.push(newArrWindow[i][j])
+                }
+            }
+            result.push(arrEl)
+        }
+        return result
+    }
+
+    getNewArrWindow (arr) {                     // розвертае масив щоб співпадали paylines і window
         const window = this.geometry[0]
         const result = []
     
@@ -58,24 +76,7 @@ class Win {
         return result.reverse()
     }
 
-    getPaylinesArr(arrWindow) {
-        const newArrWindow = this.getNewArrWindow(arrWindow)
-        const arr = this.paylines
-        const result = []
-        for(let i = 0; i <= arr.length - 1; i++){
-            const arrEl = []
-            for( let j = 0; j <= arr[i].length - 1; j++){
-                
-                if(arr[i][j] > 0){
-                    arrEl.push(newArrWindow[i][j])
-                }
-            }
-            result.push(arrEl)
-        }
-        return result
-    }
-
-    getArrWindowForOneReels() {
+    getArrWindowForOneReels() {                 // отримуємо масив відповідно до window.geometry з рандомними сусідніми значеннями
         const size = this.geometry[0]
         const arr2 = [...this.reels]
         const result = arr2.reduce((acc, str) => {

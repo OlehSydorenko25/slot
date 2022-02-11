@@ -15,8 +15,9 @@ router.get(
     '/',
     async (req, res, next) => {
         try {
-            const result = new Win(req.query, configuration)
-            res.send(result.getTotalWin())
+            const newGame = await new Win(req.query, configuration)
+            const result = newGame.getTotalWin()
+            res.send(result)
         } catch (err) {
             next(err)
         }
